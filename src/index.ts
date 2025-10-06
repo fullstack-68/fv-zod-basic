@@ -3,6 +3,7 @@ import debug from "debug";
 import { z } from "zod";
 
 const log = debug("myapp");
+log("-----------------------------");
 
 // ! Basic
 // * Creating a schema for strings
@@ -26,12 +27,13 @@ const s2 = z.object({
 // ! Type extraction
 // * Extract the inferred type
 type S2 = z.infer<typeof s2>;
+// const s2_obj: S2 = {}; // Try intellisense
 
 // ! More complicated object
 const s3 = z.object({
   id: z.string().min(1, { message: "Missing ID" }),
   createdAt: z.number(),
-  email: z.string().email({ message: "Invalid email" }),
+  email: z.email({ message: "Invalid email" }),
 });
 const s3Test = {
   id: "1234",
@@ -48,12 +50,13 @@ const s4 = z
     /^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/,
     "User format YYYY-MM-DD"
   );
-// log(JSON.stringify(s4.safeParse("2021-01-01"), null, 2));
+// log(JSON.stringify(s4.safeParse("2021-01-4401"), null, 2));
 
 // ! Date parse (general format)
 const s5 = z
   .string()
-  .refine((s) => z.coerce.date().safeParse(s).success, "Invalid date");
+  .refine((s) => z.coerce.date().safeParse(s).success, "Invalid date")
+  .transform((ds) => new Date(ds));
 // log(JSON.stringify(s5.safeParse("10-10-2024"), null, 2));
 // log(JSON.stringify(s5.safeParse("10/10/2024"), null, 2));
 // log(JSON.stringify(s5.safeParse("2024-10-10"), null, 2));
@@ -67,7 +70,7 @@ const s6 = z
   .refine((s) => z.coerce.date().safeParse(s).success, "Invalid date")
   .refine((d) => new Date(d) <= new Date(), "Cannot use future date.");
 // log(JSON.stringify(s6.safeParse("2021-01-01"), null, 2));
-// log(JSON.stringify(s6.safeParse("2025-01-01"), null, 2));
+// log(JSON.stringify(s6.safeParse("2525-01-01"), null, 2));
 
 // ! Validate with 2 fields
 const s7 = z
@@ -96,3 +99,5 @@ const s8Test = {
 };
 // log(s8.safeParse(s8Test));
 // log(s8Mod.safeParse(s8Test));
+
+log("-----------------------------");
